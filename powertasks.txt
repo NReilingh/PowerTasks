@@ -1,0 +1,21 @@
+What if we had a helper function -- you know, it could even just be a PowerTask itself -- that took the name of a nuget package and resolved it down to the version-numbered folder. You could just say `Path tSQLt` and there would be some config file in the nuget package that explained which file was the default and what the directory structure should be aliased as.
+
+Man, this would be complicated, wouldn't it. Well, really it would just be an evening of powershell hacking.
+
+UPDATE: This was actually super easy to do with a regex:
+
+    $packagepath = (Get-ChildItem $Packages | Where-Object -Property Name -Match "^$([RegEx]::Escape($Package))[\.\d]*$").FullName
+
+The config file for automatic file resolution is a bit more complicated, and probably overkill.
+
+The other part is the bootstrapping. It almost seems like PowerTasks should be a powershell module to enable jerks like me to use ib with argumentcompleters and everything. Otherwise it's only really usable through pt.bat. And I get it, that's in order to support users who don't do powershell, and that's really important, but I want the bootstrapper to be disentangled from the PowerTasks setup.
+
+This isn't really necessary any more now that we have the path function above:
+
+    nuget install -ExcludeVersion -OutputDirectory packages
+
+PackagesDirectory can be defined in NuGet.Config, so now all we need is
+
+    nuget restore
+
+Paket is also a thing that I should look into, and ideally it would be great if PowerTasks could play nice with Paket, and be package management-agnostic.
